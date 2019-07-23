@@ -1,0 +1,100 @@
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title>商品列表页面</title>
+
+<!-- 获取服务器地址 -->
+<script src="./gethost.js" type="text/javascript"></script>
+
+
+<script type="text/javascript" src="static/assets/global/plugins/jquery-1.11.0.min.js"></script>
+<link type="text/css" rel="stylesheet" href="static/assets/global/plugins/bootstrap/css/bootstrap.min.css" />
+<link type="text/css" rel="stylesheet" href="static/assets/global/css/components.css" />
+<link type="text/css" rel="stylesheet" href="static/assets/admin/pages/css/login.css" />
+
+</head>
+
+<body>
+	<div class="content">
+		<h1 class="form-title">商品列表</h1>
+		<div class="table-responsive">
+			<table class="table">
+				<thead>
+					<tr>
+						<th>商品名</th>
+						<th>商品图片</th>
+						<th>商品描述</th>
+						<th>商品价格</th>
+						<th>商品库存</th>
+						<th>商品销量</th>
+				</thead>
+				<tbody id="container">
+				
+				</tbody>
+			</table>
+		</div>
+	</div>
+</body>
+
+<script>
+
+	var  g_itemList = [];
+	jQuery(document).ready(function(){
+		
+		$.ajax({ // ajax异步请求实现
+			//请求头
+			type:"GET",
+			url:"http://"+g_host+"/item/list",
+			//跨域请求给与信任
+			xhrFields:{withCredentials:true},
+			//成功回调
+			success:function(data){
+				if(data.status == "success"){
+					g_itemList = data.data;
+					reloadDom();
+				}else{
+					alert("获取商品失败，原因为"+data.data.errMsg);
+				}
+			},
+			//失败回调
+			error:function(data){
+				alert("获取商品失败，原因为"+data.responseText);
+			}
+			
+		});
+		// click事件函数返回false
+		// 返回fasle的原因：
+		// 因为button的类型是submit，按理说是post的一个form，但是我们重新了click事件
+		// 所以需要捕获click事件，不让它冒泡传递到上一层，即form层，
+		// 这涉及到了js事件冒泡传递的知识点，我还不懂
+		return false;
+		
+	});
+	
+	function reloadDom(){
+		for(var i=0; i<g_itemList.length; i++){
+			var itemVO = g_itemList[i];
+			var dom = "<tr data-id='"+itemVO.id+"' id='itemDetail"+itemVO.id+"'>"
+						+"<td>"+itemVO.title+"</td>"
+						+"<td><img style='width:100px;height:auto;' src='"+itemVO.imgUrl+"'/></td>"
+						+"<td>"+itemVO.description+"</td>"
+						+"<td>"+itemVO.price+"</td>"
+						+"<td>"+itemVO.stock+"</td>"
+						+"<td>"+itemVO.sales+"</td>"
+					  +"</tr>"
+			$("#container").append($(dom));
+			
+			//下面代码我还不能理解
+			$("#itemDetail"+itemVO.id).on("click",function(e){
+				window.location.href="getitem.html?id="+$(this).data("id");
+			});
+		}
+		
+	}
+</script>
+
+
+
+
+</html>

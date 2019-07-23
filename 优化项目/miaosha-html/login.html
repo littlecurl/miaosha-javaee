@@ -1,0 +1,123 @@
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title>登录界面</title>
+
+<!-- 获取服务器地址 -->
+<script src="./gethost.js" type="text/javascript"></script>
+
+
+<script type="text/javascript" src="static/assets/global/plugins/jquery-1.11.0.min.js"></script>
+<link type="text/css" rel="stylesheet" href="static/assets/global/plugins/bootstrap/css/bootstrap.min.css" />
+<link type="text/css" rel="stylesheet" href="static/assets/global/css/components.css" />
+<link type="text/css" rel="stylesheet" href="static/assets/admin/pages/css/login.css" />
+
+</head>
+
+<body class="login">
+	<div class="content">
+		<h1 class="form-title">用户登录</h1>
+		<div class="form-group">
+			<label class="control-label">手机号</label>
+			<div>
+				<input class="form-control" type="text" placeholder="手机号" name="telphone" id="telphone" />
+			</div>
+		</div>
+	
+		<div class="form-group">
+			<label class="control-label">密码</label>
+			<div>
+				<input class="form-control" type="password" placeholder="密码" name="password" id="password" />
+			</div>
+		</div>
+		<div class="form-actions">
+			<button class="btn blue" id="login" type="submit">
+				登录
+			</button>
+			<button class="btn green" id="register" type="submit">
+				注册
+			</button>
+		</div>
+	</div>
+</body>
+
+<script>
+	jQuery(document).ready(function(){
+		// 注册按钮点击事件，跳转到手机号获取验证码
+		// 跳转的href需要加file:///前缀加本地绝对路径
+		// 也可以采用相对路径，保证本页面和getotp.html页面在同一路径下
+		$("#register").on("click",function(){
+			//以下是两个错误示例
+			//window.location.href("file:///F:/Workspaces/IDEA/html/getotp.html");
+			//window.location.href("getotp.html");
+			//以下是两个正确示例
+			//window.location.href="file:///F:/Workspaces/IDEA/html/getotp.html";
+			window.location.href="getotp.html";
+		});
+		
+		
+		// 绑定button的click事件，用于向后端发送获取手机验证码的请求
+		$("#login").on("click",function(){
+		
+			// 判空处理
+			var telphone = $("#telphone").val();
+			var password = $("#password").val();
+			if(telphone == null || telphone == ""){
+				alert("手机号不能为空");
+				// click事件函数返回false
+				return false;
+			}
+			
+			if(password == null || password == ""){
+				alert("密码不能为空");
+				return false;
+			}
+			
+			
+			$.ajax({ // ajax异步请求实现
+				//请求头
+				type:"POST",
+				contentType:"application/x-www-form-urlencoded",
+				url:"http://"+g_host+"/user/login",
+				//传参
+				data:{
+					"telphone":$("#telphone").val(),
+					"password":password,
+				},
+				xhrFields:{withCredentials:true},
+				//成功回调
+				success:function(data){
+					if(data.status == "success"){
+						alert("登录成功");
+						
+						var token = data.data;
+						window.localStorage["token"] = token;
+						//alert("token"+token);
+						window.location.href="listitem.html";
+					}else{
+						alert("登录失败，原因为"+data.data.errMsg);
+					}
+				},
+				//失败回调
+				error:function(data){
+					alert("登录失败，原因为"+data.responseText);
+				}
+				
+			});
+			// click事件函数返回false
+			// 返回fasle的原因：
+			// 因为button的类型是submit，按理说是post的一个form，但是我们重新了click事件
+			// 所以需要捕获click事件，不让它冒泡传递到上一层，即form层，
+			// 这涉及到了js事件冒泡传递的知识点，我还不懂
+			return false;
+			
+		});
+	});
+
+</script>
+
+
+
+
+</html>
